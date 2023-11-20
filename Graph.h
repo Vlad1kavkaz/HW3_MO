@@ -227,11 +227,22 @@ public:
         return flag;
     }
 
-    GraphNode getNodeFromTask(const Task& task) {
+    GraphNode getNodeFromTaskEarly(const Task& task) {
         for (auto& node : _graph) {
             for (auto& nextTask : node.nextTasks) {
                 if (nextTask.second == task) {
-                    return getNode(nextTask.first);
+                    return getNode(node);
+                }
+            }
+        }
+        return {};
+    }
+
+    GraphNode getNodeFromTaskLate(const Task& task) {
+        for (auto& node : _graph) {
+            for (auto& nextTask : node.previousTasks) {
+                if (nextTask.second == task) {
+                    return getNode(node);
                 }
             }
         }
@@ -249,11 +260,12 @@ public:
         cout << "|  Name  |  Duration  |  Early Finish  |  Late Start  |  Total Reserve  |  Free Reserve  |" << endl;
         cout << "------------------------------------------------------------------------------------------" << endl;
         for (const auto& task : setTasks) {
-            GraphNode nextNode = getNodeFromTask(task);
+            GraphNode prevNode = getNodeFromTaskEarly(task);
+            GraphNode nextNode = getNodeFromTaskLate(task);
             cout << "|   " << setw(2) << task.nameTask << "   |   " <<
                  setw(4) << task.duration << "     |    " <<
-                 setw(6) << nextNode.earlyStart << "      |   " <<
-                 setw(6) << nextNode.lateFinish << "     |        " <<
+                 setw(6) << prevNode.earlyStart + task.duration << "      |   " <<
+                 setw(6) << nextNode.lateFinish - task.duration << "     |        " <<
                  setw(2) << task.totalReserve << "       |       " <<
                  setw(2) << task.freeReserve << "       |" << endl;
         }
